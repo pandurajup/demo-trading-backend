@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-import random
+import yfinance as yf
+import numpy as np
 
 app = FastAPI()
 
@@ -16,9 +17,6 @@ def health():
         "device": "cpu"
     }
 
-import yfinance as yf
-import numpy as np
-
 @app.post("/predict")
 def predict(data: dict):
     symbol = data.get("symbol", "RELIANCE.NS")
@@ -31,7 +29,6 @@ def predict(data: dict):
 
         close_prices = df["Close"].values
 
-        # Simple logic (replace with AI later)
         trend = close_prices[-1] - close_prices[0]
 
         if trend > 0:
@@ -51,4 +48,3 @@ def predict(data: dict):
 
     except Exception as e:
         return {"error": str(e)}
-        }
