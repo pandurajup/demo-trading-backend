@@ -16,10 +16,39 @@ def health():
         "device": "cpu"
     }
 
+import yfinance as yf
+import numpy as np
+
 @app.post("/predict")
 def predict(data: dict):
-    return {
-        "symbol": data.get("symbol", "UNKNOWN"),
-        "prediction": random.choice(["BUY", "SELL", "HOLD"]),
-        "confidence": round(random.uniform(60, 95), 2)
-    }
+    symbol = data.get("symbol", "RELIANCE.NS")
+
+    try:
+        df = yf.download(symbol, period="5d", interval="1h")
+
+        if df.empty:
+            return {"error": "No data found"}
+
+        close_prices = df["Close"].values
+
+        # Simple logic (replace with AI later)
+        trend = close_prices[-1] - close_prices[0]
+
+        if trend > 0:
+            prediction = "BUY"
+        elif trend < 0:
+            prediction = "SELL"
+        else:
+            prediction = "HOLD"
+
+        confidence = float(abs(trend) / close_prices[0] * 100)
+
+        return {
+            "symbol": symbol,
+            "prediction": prediction,
+            "confidence": round(min(confidence, 95), 2)
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+        }
